@@ -383,6 +383,14 @@ class ProxyHandler(BaseHTTPRequestHandler):
         else:
             self.wfile.write(string)
 
+    csp_permit_all="""default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' 'unsafe-dynamic'; 
+                    script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; 
+                    connect-src * data: blob: 'unsafe-inline'; 
+                    img-src * data: blob: 'unsafe-inline'; 
+                    frame-src * data: blob: ; 
+                    style-src * data: blob: 'unsafe-inline';
+                    font-src * data: blob: 'unsafe-inline';
+                    frame-ancestors * data: blob: 'unsafe-inline';"""
 
     def handle_content(self, resp):
         headerstr='HTTP/1.0 %d %s\r\n' % (resp.status, resp.reason)
@@ -397,6 +405,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 v = self.rewrite_cookie(v)
             elif k == "location" and resp.newlocation:
                 v = resp.newlocation
+            elif k == "content-security-policy:":
+                k = csp_permit_all
 
             headerstr += "%s: %s\r\n" % (k, v)
 
