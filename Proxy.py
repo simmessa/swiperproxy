@@ -310,6 +310,17 @@ class ProxyHandler(BaseHTTPRequestHandler):
         """
         Handle HTML, JS and CSS pages.
         """
+
+        # Fuck those csp...
+        csp_permit_all="""default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' 'unsafe-dynamic'; 
+                        script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; 
+                        connect-src * data: blob: 'unsafe-inline'; 
+                        img-src * data: blob: 'unsafe-inline'; 
+                        frame-src * data: blob: ; 
+                        style-src * data: blob: 'unsafe-inline';
+                        font-src * data: blob: 'unsafe-inline';
+                        frame-ancestors * data: blob: 'unsafe-inline';"""
+
         self.resp = resp
         try:
             self.content_length = int(resp.getheader('content-length', -1))
@@ -339,6 +350,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 continue
             elif k == "location" and resp.newlocation:
                 v = resp.newlocation
+            elif k == "content-security-policy":
+                v = csp_permit_all
+                # print "csp bypass"
 
             if k:
                 headerstr += "%s: %s\r\n" % (k, v)
@@ -383,20 +397,24 @@ class ProxyHandler(BaseHTTPRequestHandler):
         else:
             self.wfile.write(string)
 
-    csp_permit_all="""default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' 'unsafe-dynamic'; 
-                    script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; 
-                    connect-src * data: blob: 'unsafe-inline'; 
-                    img-src * data: blob: 'unsafe-inline'; 
-                    frame-src * data: blob: ; 
-                    style-src * data: blob: 'unsafe-inline';
-                    font-src * data: blob: 'unsafe-inline';
-                    frame-ancestors * data: blob: 'unsafe-inline';"""
 
     def handle_content(self, resp):
+
+        csp_permit_all="""default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' 'unsafe-dynamic'; 
+                        script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; 
+                        connect-src * data: blob: 'unsafe-inline'; 
+                        img-src * data: blob: 'unsafe-inline'; 
+                        frame-src * data: blob: ; 
+                        style-src * data: blob: 'unsafe-inline';
+                        font-src * data: blob: 'unsafe-inline';
+                        frame-ancestors * data: blob: 'unsafe-inline';"""
+
         headerstr='HTTP/1.0 %d %s\r\n' % (resp.status, resp.reason)
         headerstr+='Server: %s\r\n' % (self.server_version)
         headerstr+='Date: %s\r\n' % (self.date_time_string())
         headerstr+='Content-base: %s\r\n' % (self.remote_host)
+        # headerstr+='X-Ostia: %s\r\n' % ("ostia")
+
         for (k, v) in resp.getheaders():
             if k in ["content-length", "server", "date", "content-encoding",
                      "transfer-encoding"]:
@@ -405,8 +423,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 v = self.rewrite_cookie(v)
             elif k == "location" and resp.newlocation:
                 v = resp.newlocation
-            elif k == "content-security-policy:":
-                k = csp_permit_all
+            elif k == "content-security-policy":
+                v = csp_permit_all
+                # print "csp bypass"
 
             headerstr += "%s: %s\r\n" % (k, v)
 

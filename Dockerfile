@@ -11,9 +11,14 @@ RUN set -ex  && apk add --no-cache  git  gnupg   openssl   tar   xz   wget && wg
 
 RUN set -ex; apk add --no-cache python-dev g++; wget -O get-pip.py 'https://bootstrap.pypa.io/pip/2.7/get-pip.py'; python get-pip.py --disable-pip-version-check   --no-cache-dir "pip==$PYTHON_PIP_VERSION"; pip --version;
 
+ENV OSTIA 3
+# RUN git clone https://github.com/google/streamhtmlparser.git && cd streamhtmlparser && ./configure && make && make install
+COPY streamhtmlparser.so /usr/local/lib/python2.7/site-packages/streamhtmlparser.so
+
 WORKDIR /opt/SwiperProxy/swiperproxy/
 
-RUN git clone https://github.com/simmessa/swiperproxy.git && cd swiperproxy; ls; cd include/streamhtmlparser; ./configure && make && make install
+RUN git clone https://github.com/simmessa/swiperproxy.git
+RUN cd swiperproxy; ls; cd include/streamhtmlparser; ./configure && make && make install
 RUN pip install ipy==0.83
 RUN mkdir -p /var/log/swiperproxy/
 COPY . /opt/SwiperProxy/swiperproxy
