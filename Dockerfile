@@ -17,6 +17,9 @@ COPY streamhtmlparser.so /usr/local/lib/python2.7/site-packages/streamhtmlparser
 
 WORKDIR /opt/SwiperProxy/swiperproxy/
 
+#logs to stdout/stderr
+# RUN ln -sf /dev/stdout /var/log/nginx/access.log && ln -sf /dev/stderr /var/log/nginx/error.log
+
 RUN git clone https://github.com/simmessa/swiperproxy.git
 RUN cd swiperproxy; ls; cd include/streamhtmlparser; ./configure && make && make install
 RUN pip install ipy==0.83

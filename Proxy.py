@@ -220,6 +220,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
             req_headers = {}
             for k in  self.headers:
+                # debug
+                # print "k: %s > remote: %s \n" %(k, self.remote_host)                
                 if k == 'host':
                     req_headers[k] = self.remote_host
                 elif k == 'referer':

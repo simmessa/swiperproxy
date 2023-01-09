@@ -7,7 +7,11 @@ if [ ! -e /opt/SwiperProxy/swiperproxy/cert.pem ]; then
                             -out /tmp/cert.temp.pem -days 365 -nodes \
                             -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com"
         cat /tmp/key.pem /tmp/cert.temp.pem > /opt/SwiperProxy/swiperproxy/cert.pem
+        echo This is your cert:
+        echo
         cat /opt/SwiperProxy/swiperproxy/cert.pem
+        echo
+        echo started.
 fi
 
 # TODO support any proxy.conf element use env vars with same field name with SP_ prefix?
